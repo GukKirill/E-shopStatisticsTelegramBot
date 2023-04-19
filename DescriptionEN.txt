@@ -1,0 +1,16 @@
+Project description:
+Telegram bot for processing data about orders from e-shop.
+
+PL - Python
+
+The main module:
+aiogram
+
+Additional modules:
+os,
+dotenv,
+sqlite3,
+aiosqlite,
+datetime,
+email,
+imaplib
