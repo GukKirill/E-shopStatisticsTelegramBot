@@ -3,7 +3,7 @@ Telegram bot for processing data about orders from e-shop.
 
 PL - Python
 
-The main module:
+Main module:
 aiogram
 
 Additional modules:
@@ -14,3 +14,48 @@ aiosqlite,
 datetime,
 email,
 imaplib
+
+
+Main components and tasks of the project:
+1. Receiving by the bot of the data about orders sent by e-mail.
+2. Data processing and entering into the database.
+3. Getting statistics on request.
+
+    1. Getting of the data by direct access to emails with email and imaplib modules.
+        - E-mails come to the mailbox not only from the e-shop and not only about the orders.
+        - The bot will run locally if statistics output is required. Hosting is not required.
+
+        During updating of the statistics, the bot should receive a list of unique ids of all messages from the "inbox",
+        then get the unique id of the last checked e-mail from the database.
+        Then comes the opening of each new e-mail for the bot:
+            If the e-mail is from the e-shop, then we process further;
+            If the e-mail is from another source, we simply change the unique id of the last viewed e-mail in the
+            database.
+        During processing of the "needed" e-mail, we also change the unique id of the last viewed e-mail in the database.
+        We dig the "body" of the e-mail to the text/html content type. Then we send this data for processing
+        and preparation to be included in the database.
+
+
+    2. The sqlite3 database will be used for data storage.
+    DB structure:
+    dates - id: int, date: date
+    products - id: int, product: text
+    codes - id: int, code: text, title: text, product_id: int
+    orders - id: int, date_id: int, code_id: int, amount: int
+    mail - last_uid: int
+
+
+    3. Getting of the statistics includes product type query and period query.
+    Product type request using inline-buttons with callback_data like product_all, product_id (product), ...:
+        - all products
+        - the generator of buttons for all types of products from the "products" table.
+
+    Period request using inline-buttons with callback_data like period_all, period_this_year, ...:
+        - all
+        - for the current year
+        - for the last year
+        - custom -> will trigger a requirement for user input
+                               in the format: "dd.mm.yyyy-dd.mm.yyyy".
+
+    The output of the statistics for each type of product will be in a single message in the format:
+    '{code} {title} - orders: {number of orders per period}, units: {sum of ordered units}'
